@@ -75,6 +75,21 @@ public class BrowserClient extends WebViewClient {
         FlutterWebviewPlugin.channel.invokeMethod("onState", data);
         return isInvalid;
     }
+    
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+        // Notify the host application of a resource request and allow the application to return the data. 
+        // If the return value is null, the WebView will continue to load the resource as usual. 
+        // Otherwise, the return response and data will be used.
+        String url = request.getUrl().toString();
+        boolean isInvalid = checkInvalidUrl(url);
+        Map<String, Object> data = new HashMap<>();
+        data.put("url", url);
+        data.put("type", isInvalid ? "abortLoad" : "shouldStart");
+        
+        FlutterWebviewPlugin.channel.invokeMethod("onState", data);
+        return super.shouldInterceptRequest(view, request);
+    }
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
